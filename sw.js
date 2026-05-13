@@ -1,9 +1,9 @@
-const CACHE = 'spese-v28';
+const CACHE = 'spese-v31';
 const ASSETS = [
   './',
   'index.html',
-  'styles.css?v=26',
-  'app.js?v=26',
+  'styles.css?v=30',
+  'app.js?v=31',
   'manifest.webmanifest',
   'icon.svg',
   'icon-192.png',

@@ -35,8 +35,10 @@ function iconSvg(name, color) {
 }
 
 const COLORS = [
-  '#7aa6ff', '#f4a6c0', '#e88a95', '#8dc9e8', '#f5b895',
-  '#e6c767', '#8acca5', '#e8a06d', '#c79de0', '#7fc3b5',
+  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
+  '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
+  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+  '#ec4899', '#f43f5e', '#fb923c', '#4ade80', '#38bdf8',
 ];
 
 // ---------- Data ----------
@@ -1196,6 +1198,32 @@ async function updatePersistStatusUI() {
 // ---------- Init ----------
 render();
 requestPersistence();
+
+// ---------- Swipe gesture for period navigation ----------
+let swipeStartX = null;
+let swipeStartY = null;
+
+document.addEventListener('touchstart', (e) => {
+  if (state.modal || state.period === 'all' || e.touches.length !== 1) {
+    swipeStartX = null;
+    return;
+  }
+  swipeStartX = e.touches[0].clientX;
+  swipeStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (swipeStartX === null) return;
+  const touch = e.changedTouches[0];
+  const dx = touch.clientX - swipeStartX;
+  const dy = touch.clientY - swipeStartY;
+  swipeStartX = null;
+  if (state.modal || state.period === 'all') return;
+  if (Math.abs(dx) < 60) return;
+  if (Math.abs(dx) <= Math.abs(dy) * 1.5) return;
+  shiftPeriod(dx > 0 ? -1 : 1);
+  render();
+}, { passive: true });
 
 if ('serviceWorker' in navigator) {
   let refreshing = false;
