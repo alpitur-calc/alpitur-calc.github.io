@@ -540,23 +540,36 @@ const GEAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 
 function render() {
   app.innerHTML = '';
-  app.append(renderTop());
+  app.append(renderPeriodBar());
+  const swipeContent = h('div', { id: 'swipe-content' });
+  swipeContent.append(renderRangeNav());
   const banner = renderBackupBanner();
-  if (banner) app.append(banner);
-  app.append(renderBalancePill());
+  if (banner) swipeContent.append(banner);
+  swipeContent.append(renderBalancePill());
   const pie = renderPieChart();
-  if (pie) app.append(pie);
-  app.append(renderSortToggle());
-  app.append(state.sort === 'date' ? renderEntriesByDate() : renderCategoriesView());
+  if (pie) swipeContent.append(pie);
+  swipeContent.append(renderSortToggle());
+  swipeContent.append(state.sort === 'date' ? renderEntriesByDate() : renderCategoriesView());
+  app.append(swipeContent);
   app.append(renderFabs());
   if (state.modal) app.append(renderModal());
   save();
   updatePersistStatusUI();
 }
 
-function renderTop() {
-  const frag = document.createDocumentFragment();
-  frag.append(h('div', { class: 'period' },
+function navigateWithAnimation(dir) {
+  if (state.period === 'all') return;
+  shiftPeriod(dir);
+  render();
+  const content = document.getElementById('swipe-content');
+  if (!content) return;
+  const cls = dir > 0 ? 'slide-in-from-right' : 'slide-in-from-left';
+  content.classList.add(cls);
+  setTimeout(() => content.classList.remove(cls), 300);
+}
+
+function renderPeriodBar() {
+  return h('div', { class: 'period' },
     h('div', { class: 'period-spacer' }),
     ...['day','month','year','all'].map(p =>
       h('button', {
@@ -566,15 +579,17 @@ function renderTop() {
     ),
     h('button', { class: 'icon-btn', title: 'Impostazioni',
       onclick: openSettings, html: GEAR_ICON })
-  ));
-  frag.append(state.period !== 'all'
+  );
+}
+
+function renderRangeNav() {
+  return state.period !== 'all'
     ? h('div', { class: 'range-nav' },
-        h('button', { onclick: () => { shiftPeriod(-1); render(); } }, '‹'),
+        h('button', { onclick: () => navigateWithAnimation(-1) }, '‹'),
         h('div', { class: 'label' }, periodLabel()),
-        h('button', { onclick: () => { shiftPeriod(1); render(); } }, '›'))
+        h('button', { onclick: () => navigateWithAnimation(1) }, '›'))
     : h('div', { class: 'range-nav' },
-        h('div', { class: 'label' }, 'Tutti i periodi')));
-  return frag;
+        h('div', { class: 'label' }, 'Tutti i periodi'));
 }
 
 function renderBackupBanner() {
@@ -1221,8 +1236,7 @@ document.addEventListener('touchend', (e) => {
   if (state.modal || state.period === 'all') return;
   if (Math.abs(dx) < 60) return;
   if (Math.abs(dx) <= Math.abs(dy) * 1.5) return;
-  shiftPeriod(dx > 0 ? -1 : 1);
-  render();
+  navigateWithAnimation(dx > 0 ? -1 : 1);
 }, { passive: true });
 
 if ('serviceWorker' in navigator) {

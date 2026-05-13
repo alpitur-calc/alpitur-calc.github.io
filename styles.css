@@ -367,6 +367,21 @@ button { cursor: pointer; border: none; background: none; }
 }
 .hint { color: var(--muted); font-size: 12px; margin-top: 2px; }
 
+#swipe-content.slide-in-from-left {
+  animation: slide-in-from-left 250ms ease-out;
+}
+#swipe-content.slide-in-from-right {
+  animation: slide-in-from-right 250ms ease-out;
+}
+@keyframes slide-in-from-left {
+  from { transform: translateX(-32px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slide-in-from-right {
+  from { transform: translateX(32px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 .excluded-tag {
   display: block;
   color: var(--muted);
